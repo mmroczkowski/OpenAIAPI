@@ -56,4 +56,4 @@ We welcome contributions to this project. If you have an improvement or feature 
 
 ## License
 
-This library is licensed under the MIT license.
+This library is licensed under the Apache License 2.0.
