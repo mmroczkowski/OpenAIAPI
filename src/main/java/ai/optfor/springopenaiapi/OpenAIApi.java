@@ -24,11 +24,11 @@ public class OpenAIApi {
         restTemplate.setInterceptors(List.of(interceptor));
     }
 
-    public ChatCompletionResponse chatCompletion(String model, String prompt, String role, Integer maxTokens, double temperature) {
-        return chatCompletion(model, List.of(ChatMessage.roleMessage(role), ChatMessage.contentMessage(prompt)), maxTokens, temperature);
+    public ChatCompletionResponse chat(String model, String prompt, String role, Integer maxTokens, double temperature) {
+        return chat(model, List.of(ChatMessage.roleMessage(role), ChatMessage.contentMessage(prompt)), maxTokens, temperature);
     }
 
-    public ChatCompletionResponse chatCompletion(String model, List<ChatMessage> chats, int maxTokens, double temperature) {
+    public ChatCompletionResponse chat(String model, List<ChatMessage> chats, int maxTokens, double temperature) {
         String url = "https://api.openai.com/v1/chat/completions";
         return restTemplate.postForObject(url, new ChatCompletionRequest(model, chats, temperature, maxTokens), ChatCompletionResponse.class);
     }
