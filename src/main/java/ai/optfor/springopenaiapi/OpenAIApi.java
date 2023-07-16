@@ -24,21 +24,21 @@ public class OpenAIApi {
         restTemplate.setInterceptors(List.of(interceptor));
     }
 
-    public ChatCompletionResponse chatCompletion(String model, String prompt, String role, Integer maxTokens, double temperature) {
+    public ChatCompletionResponse chatCompletion(OpenAIModel model, String prompt, String role, Integer maxTokens, double temperature) {
         return chatCompletion(model, List.of(ChatMessage.roleMessage(role), ChatMessage.contentMessage(prompt)), maxTokens, temperature);
     }
 
-    public ChatCompletionResponse chatCompletion(String model, List<ChatMessage> chats, int maxTokens, double temperature) {
+    public ChatCompletionResponse chatCompletion(OpenAIModel model, List<ChatMessage> chats, int maxTokens, double temperature) {
         String url = "https://api.openai.com/v1/chat/completions";
-        return restTemplate.postForObject(url, new ChatCompletionRequest(model, chats, temperature, maxTokens), ChatCompletionResponse.class);
+        return restTemplate.postForObject(url, new ChatCompletionRequest(model.getModelName(), chats, temperature, maxTokens), ChatCompletionResponse.class);
     }
 
-    public EmbeddingData embedding(String model, String content) {
+    public EmbeddingData embedding(OpenAIModel model, String content) {
         return embedding(model, List.of(content)).data().get(0);
     }
 
-    public EmbeddingResponse embedding(String model, List<String> content) {
+    public EmbeddingResponse embedding(OpenAIModel model, List<String> content) {
         String url = "https://api.openai.com/v1/embeddings";
-        return restTemplate.postForObject(url, new EmbeddingRequest(model, content), EmbeddingResponse.class);
+        return restTemplate.postForObject(url, new EmbeddingRequest(model.getModelName(), content), EmbeddingResponse.class);
     }
 }
