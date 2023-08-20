@@ -8,9 +8,14 @@ import org.springframework.web.client.RestTemplate;
 import java.util.List;
 
 public class OpenAIApi {
-    public final RestTemplate restTemplate = new RestTemplate();
+    public final RestTemplate restTemplate;
 
     public OpenAIApi(String openaiKey) {
+        this(openaiKey, new RestTemplate());
+    }
+
+    public OpenAIApi(String openaiKey, RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
         requestFactory.setConnectTimeout(1000 * 5);
         requestFactory.setReadTimeout(1000 * 120);
