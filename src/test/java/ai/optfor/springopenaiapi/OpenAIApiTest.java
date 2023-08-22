@@ -3,8 +3,10 @@ package ai.optfor.springopenaiapi;
 import ai.optfor.springopenaiapi.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
@@ -13,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 public class OpenAIApiTest {
 
     @Mock
@@ -22,7 +25,6 @@ public class OpenAIApiTest {
 
     @BeforeEach
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
         openAIApi = new OpenAIApi("testKey", restTemplate);
     }
 
