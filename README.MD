@@ -10,7 +10,7 @@ To install this package into your project, you can include it as a Maven depende
 <dependency>
     <groupId>ai.optfor</groupId>
     <artifactId>spring-openai-api</artifactId>
-    <version>0.1</version>
+    <version>0.1.3</version>
 </dependency>
 ```
 
@@ -18,6 +18,7 @@ To install this package into your project, you can include it as a Maven depende
 
 - Easy to use: The API methods are directly available from the `OpenAIApi` class. No need to deal with HTTP requests and responses.
 - Authorization handling: The API key is used in all requests as a Bearer Token.
+- Caching: Responses from the API for zero temperature calls are cached to improve performance and reduce the number of API calls.
 
 ## Usage
 
@@ -26,15 +27,15 @@ To install this package into your project, you can include it as a Maven depende
 Instantiate the `OpenAIApi` class by passing your OpenAI key.
 
 ```java
-OpenAIApi openaiApi = new OpenAIApi("your_openai_key");
+OpenAIApi openaiApi = new OpenAIApi("your_openai_key", {optional rest template}, {optional cache manager});
 ```
 
 ### Chat Completion
 
-Use the `chatCompletion` method to generate chat completions.
+Use the `chat` method to generate chat completions.
 
 ```java
-ChatCompletionResponse response = openaiApi.chatCompletion("gpt-3.5-turbo", "Hello, how are you?", "system", 60);
+ChatCompletionResponse response = openaiApi.chat("gpt-3.5-turbo", "Hello, how are you?", "system", 60, 0.5);
 ```
 
 ### Embeddings
@@ -49,6 +50,7 @@ EmbeddingData embeddingData = openaiApi.embedding("gpt-3.5-turbo", "Hello, how a
 
 - Java 18
 - Spring Web 6.0.10
+- Spring Boot Starter Cache 3.1.2
 
 ## Contributing
 
