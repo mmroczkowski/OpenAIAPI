@@ -22,14 +22,14 @@ public class OpenAIApi {
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
         requestFactory.setConnectTimeout(1000 * 5);
         requestFactory.setReadTimeout(1000 * 120);
-        restTemplate.setRequestFactory(requestFactory);
+        this.restTemplate.setRequestFactory(requestFactory);
 
         ClientHttpRequestInterceptor interceptor = (request, body, execution) -> {
             request.getHeaders().add("Authorization", "Bearer " + openaiKey);
             return execution.execute(request, body);
         };
 
-        restTemplate.setInterceptors(List.of(interceptor));
+        this.restTemplate.setInterceptors(List.of(interceptor));
     }
 
     public ChatCompletionResponse chat(String model, String prompt, String role, Integer maxTokens, double temperature) {
