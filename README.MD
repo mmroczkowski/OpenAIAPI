@@ -10,7 +10,7 @@ To install this package into your project, you can include it as a Maven depende
 <dependency>
     <groupId>ai.optfor</groupId>
     <artifactId>spring-openai-api</artifactId>
-    <version>0.1.3</version>
+    <version>0.1.5</version>
 </dependency>
 ```
 
@@ -27,7 +27,7 @@ To install this package into your project, you can include it as a Maven depende
 Instantiate the `OpenAIApi` class by passing your OpenAI key.
 
 ```java
-OpenAIApi openaiApi = new OpenAIApi("your_openai_key", {optional rest template}, {optional cache manager});
+OpenAIApi openaiApi = new OpenAIApi("your_openai_key", {optional rest template}, {optional cache implementation});
 ```
 
 ### Chat Completion

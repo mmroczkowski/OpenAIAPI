@@ -1,12 +1,15 @@
 package ai.optfor.springopenaiapi;
 
-import ai.optfor.springopenaiapi.model.*;
+import ai.optfor.springopenaiapi.cache.DefaultPromptCache;
+import ai.optfor.springopenaiapi.model.ChatChoice;
+import ai.optfor.springopenaiapi.model.ChatCompletionResponse;
+import ai.optfor.springopenaiapi.model.ChatMessage;
+import ai.optfor.springopenaiapi.model.Usage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
@@ -25,7 +28,7 @@ public class OpenAIApiCacheTest {
 
     @BeforeEach
     public void setUp() {
-        openAIApi = new OpenAIApi("testKey", restTemplate, new ConcurrentMapCacheManager());
+        openAIApi = new OpenAIApi("testKey", restTemplate, new DefaultPromptCache());
     }
 
     @Test
@@ -69,34 +72,5 @@ public class OpenAIApiCacheTest {
 
         // Verify that restTemplate.postForObject was called two times
         verify(restTemplate, times(2)).postForObject(anyString(), any(), eq(ChatCompletionResponse.class));
-    }
-
-    @Test
-    public void testEmbeddingWithCache() {
-        EmbeddingResponse mockResponse = new EmbeddingResponse(
-                List.of(new EmbeddingData(List.of(0.1, 0.2, 0.3))), new Usage(1, 1, 2));
-
-        when(restTemplate.postForObject(anyString(), any(), eq(EmbeddingResponse.class))).thenReturn(mockResponse);
-
-        EmbeddingResponse response1 = openAIApi.embedding("model", List.of("Hello"));
-        EmbeddingResponse response2 = openAIApi.embedding("model", List.of("Hello"));
-
-        verify(restTemplate, times(1)).postForObject(anyString(), any(), eq(EmbeddingResponse.class));
-
-        assertEquals(mockResponse, response1);
-        assertEquals(mockResponse, response2);
-    }
-
-    @Test
-    public void testEmbeddingWithCacheDifferentContent() {
-        EmbeddingResponse mockResponse = new EmbeddingResponse(
-                List.of(new EmbeddingData(List.of(0.1, 0.2, 0.3))), new Usage(1, 1, 2));
-
-        when(restTemplate.postForObject(anyString(), any(), eq(EmbeddingResponse.class))).thenReturn(mockResponse);
-
-        openAIApi.embedding("model", List.of("Hello1"));
-        openAIApi.embedding("model", List.of("Hello2"));
-
-        verify(restTemplate, times(2)).postForObject(anyString(), any(), eq(EmbeddingResponse.class));
     }
 }

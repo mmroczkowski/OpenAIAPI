@@ -1,24 +1,29 @@
 package ai.optfor.springopenaiapi;
 
+import ai.optfor.springopenaiapi.cache.DefaultPromptCache;
+import ai.optfor.springopenaiapi.cache.PromptCache;
 import ai.optfor.springopenaiapi.model.*;
-import org.springframework.cache.Cache;
-import org.springframework.cache.CacheManager;
-import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 
+import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
+
 public class OpenAIApi {
-    public final RestTemplate restTemplate;
 
-    public final Cache cache;
+    private final ObjectMapper mapper = new ObjectMapper();
 
-    public OpenAIApi(String openaiKey, RestTemplate restTemplate, CacheManager cacheManager) {
+    private final RestTemplate restTemplate;
+
+    private final PromptCache promptCache;
+
+    public OpenAIApi(String openaiKey, RestTemplate restTemplate, PromptCache promptCache) {
         this.restTemplate = (restTemplate == null ? new RestTemplate() : restTemplate);
-        CacheManager usedCacheManager = (cacheManager == null ? new ConcurrentMapCacheManager() : cacheManager);
-        this.cache = usedCacheManager.getCache("promptCache");
+        this.promptCache = (promptCache == null ? new DefaultPromptCache() : promptCache);
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
         requestFactory.setConnectTimeout(1000 * 5);
         requestFactory.setReadTimeout(1000 * 120);
@@ -30,6 +35,8 @@ public class OpenAIApi {
         };
 
         this.restTemplate.setInterceptors(List.of(interceptor));
+
+        mapper.configure(FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
     public ChatCompletionResponse chat(String model, String prompt, String role, Integer maxTokens, double temperature) {
@@ -37,18 +44,26 @@ public class OpenAIApi {
     }
 
     public ChatCompletionResponse chat(String model, List<ChatMessage> chats, int maxTokens, double temperature) {
-        if (shouldCacheResponse(temperature)) {
-            Cache.ValueWrapper value = cache.get(createKey(model, chats, maxTokens));
-            if (value != null) {
-                return (ChatCompletionResponse) value.get();
+        if (Double.compare(temperature, 0) == 0) {
+            try {
+                String cached = promptCache.get(createKey(model, chats, maxTokens));
+                if (cached != null) {
+                    return mapper.readValue(cached, ChatCompletionResponse.class);
+                }
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
             }
         }
 
         ChatCompletionResponse response = restTemplate.postForObject("https://api.openai.com/v1/chat/completions",
                 new ChatCompletionRequest(model, chats, temperature, maxTokens), ChatCompletionResponse.class);
 
-        if (shouldCacheResponse(temperature)) {
-            cache.put(createKey(model, chats, maxTokens), response);
+        if (Double.compare(temperature, 0) == 0) {
+            try {
+                promptCache.put(createKey(model, chats, maxTokens), mapper.writeValueAsString(response));
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         return response;
@@ -59,28 +74,10 @@ public class OpenAIApi {
     }
 
     public EmbeddingResponse embedding(String model, List<String> content) {
-        if (cache != null) {
-            Cache.ValueWrapper value = cache.get(model + content);
-            if (value != null) {
-                return (EmbeddingResponse) value.get();
-            }
-        }
-
-        String url = "https://api.openai.com/v1/embeddings";
-        EmbeddingResponse response = restTemplate.postForObject(url, new EmbeddingRequest(model, content), EmbeddingResponse.class);
-
-        if (cache != null) {
-            cache.put(model + content, response);
-        }
-
-        return response;
+        return restTemplate.postForObject("https://api.openai.com/v1/embeddings", new EmbeddingRequest(model, content), EmbeddingResponse.class);
     }
 
     private String createKey(String model, List<ChatMessage> chats, int maxTokens) {
         return model + chats + maxTokens;
-    }
-
-    private boolean shouldCacheResponse(double temperature) {
-        return cache != null && Double.compare(temperature, 0) == 0;
     }
 }
