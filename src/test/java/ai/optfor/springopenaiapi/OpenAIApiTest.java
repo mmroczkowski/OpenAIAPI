@@ -29,7 +29,7 @@ public class OpenAIApiTest {
 
     @Test
     public void testChat() {
-        ChatCompletionResponse mockResponse = new ChatCompletionResponse(
+        ChatCompletionResponse mockResponse = new ChatCompletionResponse("gpt-3.5-turbo",
                 List.of(new ChatChoice(0, new ChatMessage("system", "Hello"), "stop")),
                 new Usage(1, 1, 2)
         );
@@ -44,7 +44,7 @@ public class OpenAIApiTest {
 
     @Test
     public void testChatWithSingleContent() {
-        ChatCompletionResponse mockResponse = new ChatCompletionResponse(
+        ChatCompletionResponse mockResponse = new ChatCompletionResponse("gpt-3.5-turbo",
                 List.of(new ChatChoice(0, new ChatMessage("system", "Hello"), "stop")),
                 new Usage(1, 1, 2)
         );
@@ -59,7 +59,7 @@ public class OpenAIApiTest {
 
     @Test
     public void testEmbedding() {
-        EmbeddingResponse mockResponse = new EmbeddingResponse(
+        EmbeddingResponse mockResponse = new EmbeddingResponse("model",
                 List.of(new EmbeddingData(List.of(0.1, 0.2, 0.3))),
                 new Usage(1, 1, 2)
         );
@@ -68,18 +68,6 @@ public class OpenAIApiTest {
                 .thenReturn(mockResponse);
 
         EmbeddingResponse response = openAIApi.embedding("model", List.of("Hello"));
-
-        assertEquals(mockResponse, response);
-    }
-
-    @Test
-    public void testEmbeddingWithSingleContent() {
-        EmbeddingData mockResponse = new EmbeddingData(List.of(0.1, 0.2, 0.3));
-
-        when(restTemplate.postForObject(anyString(), any(), eq(EmbeddingResponse.class)))
-                .thenReturn(new EmbeddingResponse(List.of(mockResponse), new Usage(1, 1, 2)));
-
-        EmbeddingData response = openAIApi.embedding("model", "Hello");
 
         assertEquals(mockResponse, response);
     }

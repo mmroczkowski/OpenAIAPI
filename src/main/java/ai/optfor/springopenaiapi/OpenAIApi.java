@@ -82,8 +82,8 @@ public class OpenAIApi {
         }
     }
 
-    public EmbeddingData embedding(String model, String content) {
-        return embedding(model, List.of(content)).data().get(0);
+    public EmbeddingResponse embedding(String model, String content) {
+        return embedding(model, List.of(content));
     }
 
     public EmbeddingResponse embedding(String model, List<String> content) {

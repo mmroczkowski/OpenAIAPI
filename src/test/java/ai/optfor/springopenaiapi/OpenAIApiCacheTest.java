@@ -33,7 +33,7 @@ public class OpenAIApiCacheTest {
 
     @Test
     public void testChatWithCache() {
-        ChatCompletionResponse mockResponse = new ChatCompletionResponse(
+        ChatCompletionResponse mockResponse = new ChatCompletionResponse("gpt-3.5-turbo",
                 List.of(new ChatChoice(0, new ChatMessage("system", "Hello"), "stop")), new Usage(1, 1, 2));
 
         when(restTemplate.postForObject(anyString(), any(), eq(ChatCompletionResponse.class))).thenReturn(mockResponse);
@@ -49,7 +49,7 @@ public class OpenAIApiCacheTest {
 
     @Test
     public void testChatWithCacheDifferentPrompts() {
-        ChatCompletionResponse mockResponse = new ChatCompletionResponse(
+        ChatCompletionResponse mockResponse = new ChatCompletionResponse("gpt-3.5-turbo",
                 List.of(new ChatChoice(0, new ChatMessage("system", "Hello"), "stop")), new Usage(1, 1, 2));
 
         when(restTemplate.postForObject(anyString(), any(), eq(ChatCompletionResponse.class))).thenReturn(mockResponse);
@@ -62,7 +62,7 @@ public class OpenAIApiCacheTest {
 
     @Test
     public void testChatWithCacheNonZeroTemperature() {
-        ChatCompletionResponse mockResponse = new ChatCompletionResponse(
+        ChatCompletionResponse mockResponse = new ChatCompletionResponse("gpt-3.5-turbo",
                 List.of(new ChatChoice(0, new ChatMessage("system", "Hello"), "stop")), new Usage(1, 1, 2));
 
         when(restTemplate.postForObject(anyString(), any(), eq(ChatCompletionResponse.class))).thenReturn(mockResponse);
