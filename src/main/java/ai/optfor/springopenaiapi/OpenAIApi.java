@@ -30,7 +30,7 @@ public class OpenAIApi {
         this.promptCache = (promptCache == null ? new DefaultPromptCache() : promptCache);
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
         requestFactory.setConnectTimeout(1000 * 5);
-        requestFactory.setReadTimeout(1000 * 120);
+        requestFactory.setReadTimeout(1000 * 60 * 10);
         this.restTemplate.setRequestFactory(requestFactory);
 
         ClientHttpRequestInterceptor interceptor = (request, body, execution) -> {
