@@ -5,6 +5,7 @@ import ai.optfor.springopenaiapi.cache.PromptCache;
 import ai.optfor.springopenaiapi.model.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -45,6 +46,7 @@ public class OpenAIApi {
 
         this.restTemplate.setInterceptors(List.of(interceptor));
         mapper.configure(FAIL_ON_UNKNOWN_PROPERTIES, false);
+        mapper.enable(SerializationFeature.INDENT_OUTPUT);
         this.executorService = Executors.newFixedThreadPool(3);
     }
 
