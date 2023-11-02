@@ -66,10 +66,13 @@ public class OpenAIApi {
                         return response;
                     }
                 }
-
+                long start = System.currentTimeMillis();
                 ChatCompletionResponse response = restTemplate.postForObject("https://api.openai.com/v1/chat/completions",
                         request, ChatCompletionResponse.class);
-                log.info("Received response from OpenAI API: {}", mapper.writeValueAsString(response));
+                long end = System.currentTimeMillis();
+                double seconds = ((double) (end - start)) / 1000;
+                log.info("Received response from OpenAI API: " + seconds + " s.(" +
+                        (response.usage().completion_tokens() / seconds) + " TPS) {}", mapper.writeValueAsString(response));
 
                 if (Double.compare(temperature, 0) == 0) {
                     promptCache.put(createKey(model, chats, maxTokens), mapper.writeValueAsString(response));
