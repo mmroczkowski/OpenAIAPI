@@ -40,7 +40,7 @@ public class OpenAIApi {
         this.executorService = Executors.newFixedThreadPool(3);
     }
 
-    public Flux<String> streamingChat(String model, String prompt, String role, double temperature, Integer maxTokens, String openaiKey) {
+    public Flux<String> streamingChat(String model, String prompt, String role, Integer maxTokens, double temperature, String openaiKey) {
         ChatCompletionRequest request = new ChatCompletionRequest(model,
                 List.of(ChatMessage.roleMessage(role), ChatMessage.contentMessage(prompt)), temperature, maxTokens, true);
 
