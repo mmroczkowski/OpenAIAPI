@@ -14,6 +14,10 @@ public record ChatCompletionResponse(
         return choices.get(0).message().content();
     }
 
+    public String getDelta() {
+        return choices.get(0).delta().content();
+    }
+
     public BigDecimal getCost() {
         int promptLength = usage.prompt_tokens();
         int completionLength = usage.completion_tokens();

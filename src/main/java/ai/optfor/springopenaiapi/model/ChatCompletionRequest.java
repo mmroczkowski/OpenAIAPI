@@ -6,5 +6,6 @@ public record ChatCompletionRequest(
         String model,
         List<ChatMessage> messages,
         double temperature,
-        int max_tokens) {
+        int max_tokens,
+        boolean stream) {
 }
