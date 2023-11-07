@@ -25,9 +25,11 @@ public record ChatCompletionResponse(
         if (model.startsWith("gpt-4")) {
             return computeCost(promptLength, "0.03").add(computeCost(completionLength, "0.06"));
         } else if (model.startsWith("gpt-3.5-turbo")) {
-            return computeCost(promptLength, "0.0015").add(computeCost(completionLength, "0.002"));
+            return computeCost(promptLength, "0.001").add(computeCost(completionLength, "0.002"));
         } else if (model.startsWith("gpt-3.5-turbo-16k")) {
-            return computeCost(promptLength, "0.003").add(computeCost(completionLength, "0.004"));
+            return computeCost(promptLength, "0.0015").add(computeCost(completionLength, "0.002"));
+        } else if (model.startsWith("gpt-4-1106-preview")) {
+            return computeCost(promptLength, "0.01").add(computeCost(completionLength, "0.03"));
         } else {
             return null;
         }
