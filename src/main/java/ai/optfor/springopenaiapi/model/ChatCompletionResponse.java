@@ -11,11 +11,17 @@ public record ChatCompletionResponse(
         Usage usage) {
 
     public String getFirstCompletion() {
-        return choices.get(0).message().content();
+        if (choices.get(0).message() != null) {
+            return choices.get(0).message().content();
+        }
+        return null;
     }
 
     public String getDelta() {
-        return choices.get(0).delta().content();
+        if (choices.get(0).delta() != null) {
+            return choices.get(0).delta().content();
+        }
+        return null;
     }
 
     public BigDecimal getCost() {
