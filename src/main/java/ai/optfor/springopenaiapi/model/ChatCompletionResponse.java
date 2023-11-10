@@ -1,5 +1,7 @@
 package ai.optfor.springopenaiapi.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -10,6 +12,7 @@ public record ChatCompletionResponse(
         List<ChatChoice> choices,
         Usage usage) {
 
+    @JsonIgnore
     public String getFirstCompletion() {
         if (choices.get(0).message() != null) {
             return choices.get(0).message().content();
@@ -17,6 +20,7 @@ public record ChatCompletionResponse(
         return null;
     }
 
+    @JsonIgnore
     public String getDelta() {
         if (choices.get(0).delta() != null) {
             return choices.get(0).delta().content();
