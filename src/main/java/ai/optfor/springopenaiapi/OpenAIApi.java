@@ -53,7 +53,7 @@ public class OpenAIApi {
 
         return WebClient.builder()
                 .baseUrl("https://api.openai.com/v1/chat/completions")
-                .defaultHeader("Authorization", openaiKey)
+                .defaultHeader("Authorization", "Bearer " + openaiKey)
                 .build()
                 .post()
                 .contentType(APPLICATION_JSON)
