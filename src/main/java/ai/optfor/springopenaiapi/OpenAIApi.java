@@ -6,6 +6,7 @@ import ai.optfor.springopenaiapi.model.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import io.micrometer.common.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -78,8 +79,13 @@ public class OpenAIApi {
         return chat(model, List.of(ChatMessage.roleMessage(role), ChatMessage.contentMessage(prompt)), maxTokens, temperature, openaiKey);
     }
 
+    public ChatCompletionResponse chat(String model, String prompt, String assistant, String role, Integer maxTokens, double temperature, String openaiKey) {
+        return chat(model, List.of(ChatMessage.roleMessage(role), ChatMessage.contentMessage(prompt), ChatMessage.assistantMessage(assistant)), maxTokens, temperature, openaiKey);
+    }
+
     public ChatCompletionResponse chat(String model, List<ChatMessage> chats, int maxTokens, double temperature, String openaiKey) {
-        Future<ChatCompletionResponse> future = executorService.submit(() -> chatInternal(model, chats, maxTokens, temperature, openaiKey));
+        List<ChatMessage> filteredChats = chats.stream().filter(c -> !StringUtils.isBlank(c.content())).toList();
+        Future<ChatCompletionResponse> future = executorService.submit(() -> chatInternal(model, filteredChats, maxTokens, temperature, openaiKey));
 
         try {
             return future.get();
