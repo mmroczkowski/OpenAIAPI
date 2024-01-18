@@ -32,6 +32,10 @@ public record ChatCompletionResponse(
         int promptLength = usage.prompt_tokens();
         int completionLength = usage.completion_tokens();
 
+        if (model == null) {
+            return BigDecimal.ZERO;
+        }
+
         if (model.startsWith("gpt-4")) {
             return computeCost(promptLength, "0.03").add(computeCost(completionLength, "0.06"));
         } else if (model.startsWith("gpt-3.5-turbo")) {
