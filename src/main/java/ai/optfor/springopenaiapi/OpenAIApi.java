@@ -95,18 +95,22 @@ public class OpenAIApi {
     }
 
     private ChatCompletionResponse chatInternal(String model, List<ChatMessage> chats, int maxTokens, double temperature, String openaiKey) {
+        log.info("\nCalling OpenAI API:\n" +
+                "Model: " + model + " Max tokens:" + maxTokens + " Temperature:" + temperature + "\n" +
+                chats.stream().map(chatMessage -> chatMessage.role() + ":\n" +
+                        chatMessage.content()).collect(java.util.stream.Collectors.joining("\n")));
+
         RestTemplate restTemplate = prepareRestTemplate(openaiKey);
         int retryCount = 0;
         while (true) {
             try {
                 ChatCompletionRequest request = new ChatCompletionRequest(model, chats, temperature, maxTokens, false);
-                log.info("Sending request to OpenAI API: {}", mapper.writeValueAsString(request));
 
                 if (Double.compare(temperature, 0) == 0) {
                     String cached = promptCache.get(createKey(model, chats, maxTokens));
                     if (cached != null) {
                         ChatCompletionResponse response = mapper.readValue(cached, ChatCompletionResponse.class);
-                        log.info("Returning cached response: {}", mapper.writeValueAsString(response));
+                        log.info("\nReturning cached response: {}", mapper.writeValueAsString(response));
                         return response;
                     }
                 }
@@ -115,7 +119,7 @@ public class OpenAIApi {
                         request, ChatCompletionResponse.class);
                 long end = System.currentTimeMillis();
                 double seconds = ((double) (end - start)) / 1000;
-                log.info("Received response from OpenAI API: " + seconds + " s.(" +
+                log.info("\nReceived response from OpenAI API: " + seconds + " s.(" +
                         (response.usage().completion_tokens() / seconds) + " TPS) {}", mapper.writeValueAsString(response));
 
                 if (Double.compare(temperature, 0) == 0) {
