@@ -1,6 +1,8 @@
 package ai.optfor.springopenaiapi.model;
 
+import ai.optfor.springopenaiapi.enums.LLMModel;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.micrometer.common.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -32,24 +34,16 @@ public record ChatCompletionResponse(
         int promptLength = usage.prompt_tokens();
         int completionLength = usage.completion_tokens();
 
-        if (model == null) {
+        if (StringUtils.isBlank(model)) {
             return BigDecimal.ZERO;
         }
 
-        if (model.startsWith("gpt-4")) {
-            return computeCost(promptLength, "0.03").add(computeCost(completionLength, "0.06"));
-        } else if (model.startsWith("gpt-3.5-turbo")) {
-            return computeCost(promptLength, "0.001").add(computeCost(completionLength, "0.002"));
-        } else if (model.startsWith("gpt-3.5-turbo-16k")) {
-            return computeCost(promptLength, "0.0015").add(computeCost(completionLength, "0.002"));
-        } else if (model.startsWith("gpt-4-1106-preview")) {
-            return computeCost(promptLength, "0.01").add(computeCost(completionLength, "0.03"));
-        } else {
-            return null;
-        }
+        LLMModel modelEnum = LLMModel.apiValueOf(model);
+
+        return computeCost(promptLength, modelEnum.getPromptCost()).add(computeCost(completionLength, modelEnum.getCompletionCost()));
     }
 
-    private BigDecimal computeCost(int promptLength, String costPer1000) {
-        return new BigDecimal(costPer1000).multiply(new BigDecimal(promptLength).divide(new BigDecimal(1000), DECIMAL32));
+    private BigDecimal computeCost(int length, String costPer1000) {
+        return new BigDecimal(costPer1000).multiply(new BigDecimal(length).divide(new BigDecimal(1000), DECIMAL32));
     }
 }

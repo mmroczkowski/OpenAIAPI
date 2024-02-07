@@ -1,5 +1,8 @@
 package ai.optfor.springopenaiapi.model;
 
+import ai.optfor.springopenaiapi.enums.EmbedModel;
+import io.micrometer.common.util.StringUtils;
+
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -16,14 +19,17 @@ public record EmbeddingResponse(
 
     public BigDecimal getCost() {
         int length = usage.total_tokens();
-        if (model.startsWith("text-embedding-ada-002")) {
-            return computeCost(length, "0.0001");
-        } else {
-            return null;
+
+        if (StringUtils.isBlank(model)) {
+            return BigDecimal.ZERO;
         }
+
+        EmbedModel modelEnum = EmbedModel.apiValueOf(model);
+
+        return computeCost(length, modelEnum.getCost());
     }
 
-    private BigDecimal computeCost(int promptLength, String costPer1000) {
-        return new BigDecimal(costPer1000).multiply(new BigDecimal(promptLength).divide(new BigDecimal(1000), DECIMAL32));
+    private BigDecimal computeCost(int length, String costPer1000) {
+        return new BigDecimal(costPer1000).multiply(new BigDecimal(length).divide(new BigDecimal(1000), DECIMAL32));
     }
 }

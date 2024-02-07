@@ -2,6 +2,7 @@ package ai.optfor.springopenaiapi;
 
 import ai.optfor.springopenaiapi.cache.DefaultPromptCache;
 import ai.optfor.springopenaiapi.cache.PromptCache;
+import ai.optfor.springopenaiapi.enums.LLMModel;
 import ai.optfor.springopenaiapi.model.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -41,9 +42,9 @@ public class OpenAIApi {
         this.executorService = Executors.newFixedThreadPool(3);
     }
 
-    public Flux<String> streamingChat(String model, String prompt, String assistant, String role, Integer maxTokens, double temperature, String openaiKey) {
-        ChatCompletionRequest request = new ChatCompletionRequest(model,
-                List.of(ChatMessage.roleMessage(role), ChatMessage.contentMessage(prompt), ChatMessage.assistantMessage(assistant)), temperature, maxTokens, true);
+    public Flux<String> streamingChat(LLMModel model, String system, String user, String assistant, Integer maxTokens, double temperature, String openaiKey) {
+        ChatCompletionRequest request = new ChatCompletionRequest(model.getApiName(),
+                List.of(ChatMessage.systemMessage(system), ChatMessage.userMessage(user), ChatMessage.assistantMessage(assistant)), temperature, maxTokens, true);
 
         String json;
         try {
@@ -75,15 +76,15 @@ public class OpenAIApi {
                 });
     }
 
-    public ChatCompletionResponse chat(String model, String prompt, String role, Integer maxTokens, double temperature, String openaiKey) {
-        return chat(model, List.of(ChatMessage.roleMessage(role), ChatMessage.contentMessage(prompt)), maxTokens, temperature, openaiKey);
+    public ChatCompletionResponse chat(LLMModel model, String system, String user, Integer maxTokens, double temperature, String openaiKey) {
+        return chat(model, List.of(ChatMessage.systemMessage(system), ChatMessage.userMessage(user)), maxTokens, temperature, openaiKey);
     }
 
-    public ChatCompletionResponse chat(String model, String prompt, String assistant, String role, Integer maxTokens, double temperature, String openaiKey) {
-        return chat(model, List.of(ChatMessage.roleMessage(role), ChatMessage.contentMessage(prompt), ChatMessage.assistantMessage(assistant)), maxTokens, temperature, openaiKey);
+    public ChatCompletionResponse chat(LLMModel model, String system, String user, String assistant, Integer maxTokens, double temperature, String openaiKey) {
+        return chat(model, List.of(ChatMessage.systemMessage(system), ChatMessage.userMessage(user), ChatMessage.assistantMessage(assistant)), maxTokens, temperature, openaiKey);
     }
 
-    public ChatCompletionResponse chat(String model, List<ChatMessage> chats, int maxTokens, double temperature, String openaiKey) {
+    public ChatCompletionResponse chat(LLMModel model, List<ChatMessage> chats, int maxTokens, double temperature, String openaiKey) {
         List<ChatMessage> filteredChats = chats.stream().filter(c -> !StringUtils.isBlank(c.content())).toList();
         Future<ChatCompletionResponse> future = executorService.submit(() -> chatInternal(model, filteredChats, maxTokens, temperature, openaiKey));
 
@@ -94,7 +95,7 @@ public class OpenAIApi {
         }
     }
 
-    private ChatCompletionResponse chatInternal(String model, List<ChatMessage> chats, int maxTokens, double temperature, String openaiKey) {
+    private ChatCompletionResponse chatInternal(LLMModel model, List<ChatMessage> chats, int maxTokens, double temperature, String openaiKey) {
         log.info("\nCalling OpenAI API:\n" +
                 "Model: " + model + " Max tokens:" + maxTokens + " Temperature:" + temperature + "\n" +
                 chats.stream().map(chatMessage -> chatMessage.role() + ":\n" +
@@ -104,7 +105,7 @@ public class OpenAIApi {
         int retryCount = 0;
         while (true) {
             try {
-                ChatCompletionRequest request = new ChatCompletionRequest(model, chats, temperature, maxTokens, false);
+                ChatCompletionRequest request = new ChatCompletionRequest(model.getApiName(), chats, temperature, maxTokens, false);
 
                 if (Double.compare(temperature, 0) == 0) {
                     String cached = promptCache.get(createKey(model, chats, maxTokens));
@@ -148,8 +149,8 @@ public class OpenAIApi {
         return restTemplate.postForObject("https://api.openai.com/v1/embeddings", request, EmbeddingResponse.class);
     }
 
-    private String createKey(String model, List<ChatMessage> chats, int maxTokens) {
-        return model + chats + maxTokens;
+    private String createKey(LLMModel model, List<ChatMessage> chats, int maxTokens) {
+        return model.getApiName() + chats + maxTokens;
     }
 
     private RestTemplate prepareRestTemplate(String openaiKey) {

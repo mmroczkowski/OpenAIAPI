@@ -4,15 +4,15 @@ public record ChatMessage(
         String role,
         String content) {
 
-    public static ChatMessage roleMessage(String content) {
-        return new ChatMessage("system", content);
+    public static ChatMessage systemMessage(String system) {
+        return new ChatMessage("system", system);
     }
 
-    public static ChatMessage assistantMessage(String content) {
-        return new ChatMessage("assistant", content);
+    public static ChatMessage assistantMessage(String assistant) {
+        return new ChatMessage("assistant", assistant);
     }
 
-    public static ChatMessage contentMessage(String content) {
-        return new ChatMessage("user", content);
+    public static ChatMessage userMessage(String user) {
+        return new ChatMessage("user", user);
     }
 }
