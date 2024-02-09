@@ -2,6 +2,7 @@ package ai.optfor.springopenaiapi;
 
 import ai.optfor.springopenaiapi.cache.DefaultPromptCache;
 import ai.optfor.springopenaiapi.cache.PromptCache;
+import ai.optfor.springopenaiapi.enums.EmbedModel;
 import ai.optfor.springopenaiapi.enums.LLMModel;
 import ai.optfor.springopenaiapi.model.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -134,13 +135,13 @@ public class OpenAIApi {
         }
     }
 
-    public EmbeddingResponse embedding(String model, String content, String openaiKey) {
+    public EmbeddingResponse embedding(EmbedModel model, String content, String openaiKey) {
         return embedding(model, List.of(content), openaiKey);
     }
 
-    public EmbeddingResponse embedding(String model, List<String> content, String openaiKey) {
+    public EmbeddingResponse embedding(EmbedModel model, List<String> content, String openaiKey) {
         RestTemplate restTemplate = prepareRestTemplate(openaiKey);
-        EmbeddingRequest request = new EmbeddingRequest(model, content);
+        EmbeddingRequest request = new EmbeddingRequest(model.getApiName(), content);
         try {
             log.info("Sending request to OpenAI API: {}", mapper.writeValueAsString(request));
         } catch (JsonProcessingException e) {
