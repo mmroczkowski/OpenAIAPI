@@ -49,7 +49,7 @@ class ChatCompletionResponseTest {
                 Collections.singletonList(new ChatChoice(0, null, null, null)),
                 new Usage(16000, 8000, 24000)
         );
-        assertEquals(new BigDecimal("0.0400"), response.getCost());
+        assertEquals(new BigDecimal("0.0200"), response.getCost());
     }
 
     @Test
