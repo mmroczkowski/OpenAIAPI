@@ -18,10 +18,12 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import static ai.optfor.springopenaiapi.enums.LLMModel.GPT_4_VISION_PREVIEW;
 import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.TEXT_EVENT_STREAM;
@@ -75,6 +77,23 @@ public class OpenAIApi {
                         sink.error(new RuntimeException("Error while processing JSON response", e));
                     }
                 });
+    }
+
+    public ChatCompletionResponse vision(String prompt, String imageUrl, String openaiKey) {
+        List<Map<String, Object>> messages = List.of(
+                Map.of(
+                        "role", "user",
+                        "content", List.of(
+                                Map.of("type", "text", "text", prompt),
+                                Map.of("type", "image_url", "image_url", Map.of("url", imageUrl))
+                        )
+                )
+        );
+
+        VisionCompletionRequest request = new VisionCompletionRequest(GPT_4_VISION_PREVIEW.getApiName(), messages, 0.0, 1024, false);
+
+        RestTemplate restTemplate = prepareRestTemplate(openaiKey);
+        return restTemplate.postForObject("https://api.openai.com/v1/chat/completions", request, ChatCompletionResponse.class);
     }
 
     public ChatCompletionResponse chat(LLMModel model, String system, String user, Integer maxTokens, double temperature, String openaiKey) {
