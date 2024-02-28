@@ -4,6 +4,8 @@ import ai.optfor.springopenaiapi.cache.DefaultPromptCache;
 import ai.optfor.springopenaiapi.cache.PromptCache;
 import ai.optfor.springopenaiapi.enums.EmbedModel;
 import ai.optfor.springopenaiapi.enums.LLMModel;
+import ai.optfor.springopenaiapi.enums.TTSModel;
+import ai.optfor.springopenaiapi.enums.TTSVoice;
 import ai.optfor.springopenaiapi.model.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,12 +13,14 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import io.micrometer.common.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -94,6 +98,19 @@ public class OpenAIApi {
 
         RestTemplate restTemplate = prepareRestTemplate(openaiKey);
         return restTemplate.postForObject("https://api.openai.com/v1/chat/completions", request, ChatCompletionResponse.class);
+    }
+
+    public byte[] createSpeech(TTSModel model, String input, TTSVoice voice, String openaiKey) {
+        RestTemplate restTemplate = prepareRestTemplate(openaiKey);
+        ResponseEntity<byte[]> response = restTemplate.postForEntity("https://api.openai.com/v1/audio/speech",
+                new STTRequest(model.getApiName(), input, voice.toApiName()), byte[].class
+        );
+
+        if (response.hasBody()) {
+            return response.getBody();
+        } else {
+            throw new RuntimeException("Failed to get audio response from OpenAI API");
+        }
     }
 
     public ChatCompletionResponse chat(LLMModel model, String system, String user, Integer maxTokens, double temperature, String openaiKey) {
