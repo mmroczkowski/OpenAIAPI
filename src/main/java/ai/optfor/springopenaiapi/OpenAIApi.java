@@ -13,14 +13,19 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import io.micrometer.common.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -29,8 +34,7 @@ import java.util.concurrent.Future;
 
 import static ai.optfor.springopenaiapi.enums.LLMModel.GPT_4_VISION_PREVIEW;
 import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.http.MediaType.TEXT_EVENT_STREAM;
+import static org.springframework.http.MediaType.*;
 
 public class OpenAIApi {
 
@@ -110,6 +114,34 @@ public class OpenAIApi {
             return response.getBody();
         } else {
             throw new RuntimeException("Failed to get audio response from OpenAI API");
+        }
+    }
+
+    public String transcribeAudio(byte[] audioBytes, String openaiKey) {
+        // Create an anonymous subclass of ByteArrayResource to override the filename
+        Resource audioResource = new ByteArrayResource(audioBytes) {
+            @Override
+            public String getFilename() {
+                return "audio.oga";
+            }
+        };
+
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+        body.add("file", audioResource);
+        body.add("model", "whisper-1");
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MULTIPART_FORM_DATA);
+
+        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+
+        String url = "https://api.openai.com/v1/audio/transcriptions";
+        ResponseEntity<String> response = prepareRestTemplate(openaiKey).postForEntity(url, requestEntity, String.class);
+
+        if (response.getStatusCode().is2xxSuccessful()) {
+            return response.getBody();
+        } else {
+            throw new RuntimeException(response.toString());
         }
     }
 
