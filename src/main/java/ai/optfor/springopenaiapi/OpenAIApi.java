@@ -27,7 +27,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -87,21 +86,9 @@ public class OpenAIApi {
                 });
     }
 
-    public ChatCompletionResponse vision(String prompt, String imageUrl, String openaiKey) {
-        List<Map<String, Object>> messages = List.of(
-                Map.of(
-                        "role", "user",
-                        "content", List.of(
-                                Map.of("type", "text", "text", prompt),
-                                Map.of("type", "image_url", "image_url", Map.of("url", imageUrl))
-                        )
-                )
-        );
-
+    public ChatCompletionResponse vision(List<VisionMessage> messages, String openaiKey) {
         VisionCompletionRequest request = new VisionCompletionRequest(GPT_4_VISION_PREVIEW.getApiName(), messages, 0.0, 1024, false);
-
-        RestTemplate restTemplate = prepareRestTemplate(openaiKey);
-        return restTemplate.postForObject("https://api.openai.com/v1/chat/completions", request, ChatCompletionResponse.class);
+        return prepareRestTemplate(openaiKey).postForObject("https://api.openai.com/v1/chat/completions", request, ChatCompletionResponse.class);
     }
 
     public byte[] createSpeech(TTSModel model, String input, TTSVoice voice, String openaiKey) {
