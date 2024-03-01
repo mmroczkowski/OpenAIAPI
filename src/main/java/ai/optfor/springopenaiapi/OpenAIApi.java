@@ -86,8 +86,8 @@ public class OpenAIApi {
                 });
     }
 
-    public ChatCompletionResponse vision(List<VisionMessage> messages, String openaiKey) {
-        VisionCompletionRequest request = new VisionCompletionRequest(GPT_4_VISION_PREVIEW.getApiName(), messages, 0.0, 1024, false);
+    public ChatCompletionResponse vision(List<VisionMessage> messages, Integer maxTokens, double temperature, String openaiKey) {
+        VisionCompletionRequest request = new VisionCompletionRequest(GPT_4_VISION_PREVIEW.getApiName(), messages, temperature, maxTokens, false);
         return prepareRestTemplate(openaiKey).postForObject("https://api.openai.com/v1/chat/completions", request, ChatCompletionResponse.class);
     }
 
