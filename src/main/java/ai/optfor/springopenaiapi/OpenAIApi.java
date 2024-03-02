@@ -91,6 +91,40 @@ public class OpenAIApi {
         return prepareRestTemplate(openaiKey).postForObject("https://api.openai.com/v1/chat/completions", request, ChatCompletionResponse.class);
     }
 
+    public Flux<String> visionStreaming(List<VisionMessage> messages, Integer maxTokens, double temperature, String openaiKey) {
+        VisionCompletionRequest request = new VisionCompletionRequest(GPT_4_VISION_PREVIEW.getApiName(), messages, temperature, maxTokens, true);
+
+        String json;
+        try {
+            json = mapper.writeValueAsString(request);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
+        return WebClient.builder()
+                .baseUrl("https://api.openai.com/v1/chat/completions")
+                .defaultHeader("Authorization", "Bearer " + openaiKey)
+                .build()
+                .post()
+                .contentType(APPLICATION_JSON)
+                .bodyValue(json)
+                .accept(TEXT_EVENT_STREAM)
+                .exchangeToFlux((r -> r.bodyToFlux(String.class)))
+                .takeWhile(response -> !response.equals("[DONE]"))
+                .handle((jsonResponse, sink) -> {
+                    try {
+                        String delta = mapper.readValue(jsonResponse, ChatCompletionResponse.class).getDelta();
+                        if (delta == null) {
+                            delta = "";
+                        }
+                        sink.next(delta);
+                    } catch (JsonProcessingException e) {
+                        sink.error(new RuntimeException("Error while processing JSON response", e));
+                    }
+                });
+    }
+
+
     public byte[] createSpeech(TTSModel model, String input, TTSVoice voice, String openaiKey) {
         RestTemplate restTemplate = prepareRestTemplate(openaiKey);
         ResponseEntity<byte[]> response = restTemplate.postForEntity("https://api.openai.com/v1/audio/speech",
