@@ -160,7 +160,11 @@ public class OpenAIApi {
         ResponseEntity<String> response = prepareRestTemplate(openaiKey).postForEntity(url, requestEntity, String.class);
 
         if (response.getStatusCode().is2xxSuccessful()) {
-            return response.getBody();
+            try {
+                return mapper.readValue(response.getBody(), AudioResponse.class).text();
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
         } else {
             throw new RuntimeException(response.toString());
         }
