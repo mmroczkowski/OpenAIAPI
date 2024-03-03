@@ -138,7 +138,7 @@ public class OpenAIApi {
         }
     }
 
-    public String transcribeAudio(byte[] audioBytes, String openaiKey) {
+    public String transcribeAudio(byte[] audioBytes, String languageKey, String openaiKey) {
         // Create an anonymous subclass of ByteArrayResource to override the filename
         Resource audioResource = new ByteArrayResource(audioBytes) {
             @Override
@@ -150,6 +150,7 @@ public class OpenAIApi {
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
         body.add("file", audioResource);
         body.add("model", "whisper-1");
+        body.add("language", languageKey);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MULTIPART_FORM_DATA);
