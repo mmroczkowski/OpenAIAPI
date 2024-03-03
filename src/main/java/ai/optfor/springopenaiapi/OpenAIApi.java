@@ -53,8 +53,12 @@ public class OpenAIApi {
     }
 
     public Flux<String> streamingChat(LLMModel model, String system, String user, String assistant, Integer maxTokens, double temperature, String openaiKey) {
+        return streamingChat(model, List.of(ChatMessage.systemMessage(system), ChatMessage.userMessage(user), ChatMessage.assistantMessage(assistant)), maxTokens, temperature, openaiKey);
+    }
+
+    public Flux<String> streamingChat(LLMModel model, List<ChatMessage> messages, Integer maxTokens, double temperature, String openaiKey) {
         ChatCompletionRequest request = new ChatCompletionRequest(model.getApiName(),
-                List.of(ChatMessage.systemMessage(system), ChatMessage.userMessage(user), ChatMessage.assistantMessage(assistant)), temperature, maxTokens, true);
+                messages, temperature, maxTokens, true);
 
         String json;
         try {
