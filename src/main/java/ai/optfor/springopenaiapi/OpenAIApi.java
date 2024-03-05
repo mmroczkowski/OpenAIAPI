@@ -95,8 +95,12 @@ public class OpenAIApi {
         return prepareRestTemplate(openaiKey).postForObject("https://api.openai.com/v1/chat/completions", request, ChatCompletionResponse.class);
     }
 
-    public Flux<String> visionStreaming(List<VisionMessage> messages, Integer maxTokens, double temperature, String openaiKey) {
-        VisionCompletionRequest request = new VisionCompletionRequest(GPT_4_VISION_PREVIEW.getApiName(), messages, temperature, maxTokens, true);
+    public Flux<String> visionStreaming(LLMModel model, List<VisionMessage> messages, Integer maxTokens, double temperature, String openaiKey) {
+        log.info("\nCalling OpenAI API:\n" +
+                "Model: " + model + " Max tokens:" + maxTokens + " Temperature:" + temperature + "\n" +
+                messages.stream().map(chatMessage -> chatMessage.role() + ":\n" +
+                        chatMessage.content()).collect(java.util.stream.Collectors.joining("\n")));
+        VisionCompletionRequest request = new VisionCompletionRequest(model.getApiName(), messages, temperature, maxTokens, true);
 
         String json;
         try {
@@ -105,7 +109,9 @@ public class OpenAIApi {
             throw new RuntimeException(e);
         }
 
-        return WebClient.builder()
+        StringBuilder fullResponse = new StringBuilder();
+        long start = System.currentTimeMillis();
+        Flux<String> result = WebClient.builder()
                 .baseUrl("https://api.openai.com/v1/chat/completions")
                 .defaultHeader("Authorization", "Bearer " + openaiKey)
                 .build()
@@ -121,11 +127,18 @@ public class OpenAIApi {
                         if (delta == null) {
                             delta = "";
                         }
+                        fullResponse.append(delta);
                         sink.next(delta);
                     } catch (JsonProcessingException e) {
                         sink.error(new RuntimeException("Error while processing JSON response", e));
                     }
                 });
+
+        return result.doOnComplete(() -> {
+            long end = System.currentTimeMillis();
+            double seconds = ((double) (end - start)) / 1000;
+            log.info("\nReceived response from OpenAI API: " + seconds + " s.(" + fullResponse + ")");
+        });
     }
 
 
