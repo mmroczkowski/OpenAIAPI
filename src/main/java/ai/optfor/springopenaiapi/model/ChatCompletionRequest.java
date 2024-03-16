@@ -7,5 +7,6 @@ public record ChatCompletionRequest(
         List<ChatMessage> messages,
         double temperature,
         int max_tokens,
+        ResponseFormat response_format,
         boolean stream) {
 }
