@@ -32,6 +32,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import static ai.optfor.springopenaiapi.enums.LLMModel.GPT_4_VISION_PREVIEW;
+import static ai.optfor.springopenaiapi.enums.Role.*;
 import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
 import static org.springframework.http.MediaType.*;
 
@@ -53,12 +54,12 @@ public class OpenAIApi {
     }
 
     public Flux<String> streamingChat(LLMModel model, String system, String user, String assistant, Integer maxTokens, double temperature, String openaiKey) {
-        return streamingChat(model, List.of(ChatMessage.systemMessage(system), ChatMessage.userMessage(user), ChatMessage.assistantMessage(assistant)), maxTokens, temperature, openaiKey);
+        return streamingChat(model, List.of(SYSTEM.message(system), USER.message(user), ASSISTANT.message(assistant)), maxTokens, temperature, openaiKey);
     }
 
     public Flux<String> streamingChat(LLMModel model, List<ChatMessage> messages, Integer maxTokens, double temperature, String openaiKey) {
         ChatCompletionRequest request = new ChatCompletionRequest(model.getApiName(),
-                messages, temperature, maxTokens,null, true);
+                messages, temperature, maxTokens, null, true);
 
         String json;
         try {
@@ -189,11 +190,11 @@ public class OpenAIApi {
     }
 
     public ChatCompletionResponse chat(LLMModel model, String system, String user, Integer maxTokens, double temperature, boolean jsonMode, String openaiKey) {
-        return chat(model, List.of(ChatMessage.systemMessage(system), ChatMessage.userMessage(user)), maxTokens, temperature, jsonMode, openaiKey);
+        return chat(model, List.of(SYSTEM.message(system), USER.message(user)), maxTokens, temperature, jsonMode, openaiKey);
     }
 
     public ChatCompletionResponse chat(LLMModel model, String system, String user, String assistant, Integer maxTokens, double temperature, boolean jsonMode, String openaiKey) {
-        return chat(model, List.of(ChatMessage.systemMessage(system), ChatMessage.userMessage(user), ChatMessage.assistantMessage(assistant)), maxTokens, temperature, jsonMode, openaiKey);
+        return chat(model, List.of(SYSTEM.message(system), USER.message(user), ASSISTANT.message(assistant)), maxTokens, temperature, jsonMode, openaiKey);
     }
 
     public ChatCompletionResponse chat(LLMModel model, List<ChatMessage> chats, int maxTokens, double temperature, boolean jsonMode, String openaiKey) {

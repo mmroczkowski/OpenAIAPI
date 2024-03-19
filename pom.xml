@@ -6,7 +6,7 @@
 
     <groupId>ai.optfor</groupId>
     <artifactId>spring-openai-api</artifactId>
-    <version>0.3.15</version>
+    <version>0.3.16</version>
 
     <name>Spring OpenAI API</name>
     <description>This Java library is an easy-to-use client for interacting with OpenAI's API within a Spring application</description>
