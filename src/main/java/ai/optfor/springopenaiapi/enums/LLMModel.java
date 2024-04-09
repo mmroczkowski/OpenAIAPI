@@ -7,6 +7,7 @@ import java.util.Arrays;
 @Getter
 public enum LLMModel {
     GPT_4_TURBO_PREVIEW("gpt-4-turbo-preview", "0.01", "0.03"),
+    GPT_4_TURBO("gpt-4-turbo", "0.01", "0.03"),
     GPT_4("gpt-4", "0.03", "0.06"),
     GPT_3_5_TURBO("gpt-3.5-turbo", "0.0005", "0.0015"),
     GPT_3_5_TURBO_16K("gpt-3.5-turbo-16k", "0.0015", "0.0020"),
