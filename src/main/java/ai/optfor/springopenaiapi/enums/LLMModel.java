@@ -11,7 +11,8 @@ public enum LLMModel {
     GPT_4("gpt-4", "0.03", "0.06"),
     GPT_3_5_TURBO("gpt-3.5-turbo", "0.0005", "0.0015"),
     GPT_3_5_TURBO_16K("gpt-3.5-turbo-16k", "0.0015", "0.0020"),
-    GPT_4_VISION_PREVIEW("gpt-4-vision-preview", "0.01", "0.03");
+    GPT_4_VISION_PREVIEW("gpt-4-vision-preview", "0.01", "0.03"),
+    GPT_4_O("gpt-4o", "0.005", "0.015");
 
     private final String apiName;
     private final String promptCost;
