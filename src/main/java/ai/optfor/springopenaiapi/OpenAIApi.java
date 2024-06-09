@@ -27,11 +27,11 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import static ai.optfor.springopenaiapi.enums.LLMModel.GPT_4_VISION_PREVIEW;
 import static ai.optfor.springopenaiapi.enums.Role.*;
 import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
 import static org.springframework.http.MediaType.*;
@@ -104,17 +104,17 @@ public class OpenAIApi {
         });
     }
 
-    public ChatCompletionResponse vision(LLMModel model, List<VisionMessage> messages, Integer maxTokens, double temperature, String openaiKey) {
-        VisionCompletionRequest request = new VisionCompletionRequest(model.getApiName(), messages, temperature, maxTokens, false);
+    public ChatCompletionResponse vision(LLMModel model, List<VisionMessage> messages, Integer maxTokens, double temperature, Map<Integer, Integer> logit_bias, String openaiKey) {
+        VisionCompletionRequest request = new VisionCompletionRequest(model.getApiName(), messages, temperature, maxTokens, false, logit_bias);
         return prepareRestTemplate(openaiKey).postForObject("https://api.openai.com/v1/chat/completions", request, ChatCompletionResponse.class);
     }
 
-    public Flux<String> visionStreaming(LLMModel model, List<VisionMessage> messages, Integer maxTokens, double temperature, String openaiKey) {
+    public Flux<String> visionStreaming(LLMModel model, List<VisionMessage> messages, Integer maxTokens, double temperature, Map<Integer, Integer> logit_bias, String openaiKey) {
         log.info("\nCalling OpenAI API:\n" +
                 "Model: " + model + " Max tokens:" + maxTokens + " Temperature:" + temperature + "\n" +
                 messages.stream().map(chatMessage -> chatMessage.role() + ":\n" +
                         chatMessage.content()).collect(java.util.stream.Collectors.joining("\n")));
-        VisionCompletionRequest request = new VisionCompletionRequest(model.getApiName(), messages, temperature, maxTokens, true);
+        VisionCompletionRequest request = new VisionCompletionRequest(model.getApiName(), messages, temperature, maxTokens, true, logit_bias);
 
         String json;
         try {
