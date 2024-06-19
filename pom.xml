@@ -78,6 +78,9 @@
                         <version>1.12.0</version>
                         <configuration>
                             <jreleaser>
+                                <project>
+                                    <copyright>2024 OptFor.ai</copyright>
+                                </project>
                                 <signing>
                                     <active>ALWAYS</active>
                                     <armored>true</armored>
