@@ -53,17 +53,17 @@ public class OpenAIApi {
         this.executorService = Executors.newFixedThreadPool(3);
     }
 
-    public Flux<String> streamingChat(LLMModel model, String system, String user, String assistant, Integer maxTokens, double temperature, String openaiKey) {
-        return streamingChat(model, List.of(SYSTEM.message(system), USER.message(user), ASSISTANT.message(assistant)), maxTokens, temperature, openaiKey);
+    public Flux<String> streamingChat(LLMModel model, String system, String user, String assistant, Integer maxTokens, double temperature, Map<Integer, Integer> logit_bias, String openaiKey) {
+        return streamingChat(model, List.of(SYSTEM.message(system), USER.message(user), ASSISTANT.message(assistant)), maxTokens, temperature, logit_bias, openaiKey);
     }
 
-    public Flux<String> streamingChat(LLMModel model, List<ChatMessage> messages, Integer maxTokens, double temperature, String openaiKey) {
+    public Flux<String> streamingChat(LLMModel model, List<ChatMessage> messages, Integer maxTokens, double temperature, Map<Integer, Integer> logit_bias, String openaiKey) {
         log.info("\nCalling OpenAI API:\n" +
                 "Model: " + model + " Max tokens:" + maxTokens + " Temperature:" + temperature + "\n" +
                 messages.stream().map(chatMessage -> chatMessage.role() + ":\n" +
                         chatMessage.content()).collect(java.util.stream.Collectors.joining("\n")));
         ChatCompletionRequest request = new ChatCompletionRequest(model.getApiName(),
-                messages, temperature, maxTokens, null, true, null);
+                messages, temperature, maxTokens, null, true, logit_bias);
 
         String json;
         try {
