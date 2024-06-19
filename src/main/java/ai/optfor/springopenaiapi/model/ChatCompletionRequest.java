@@ -1,6 +1,7 @@
 package ai.optfor.springopenaiapi.model;
 
 import java.util.List;
+import java.util.Map;
 
 public record ChatCompletionRequest(
         String model,
@@ -8,5 +9,6 @@ public record ChatCompletionRequest(
         double temperature,
         int max_tokens,
         ResponseFormat response_format,
-        boolean stream) {
+        boolean stream,
+        Map<Integer, Integer> logit_bias) {
 }

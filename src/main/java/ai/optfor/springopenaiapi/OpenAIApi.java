@@ -63,7 +63,7 @@ public class OpenAIApi {
                 messages.stream().map(chatMessage -> chatMessage.role() + ":\n" +
                         chatMessage.content()).collect(java.util.stream.Collectors.joining("\n")));
         ChatCompletionRequest request = new ChatCompletionRequest(model.getApiName(),
-                messages, temperature, maxTokens, null, true);
+                messages, temperature, maxTokens, null, true, null);
 
         String json;
         try {
@@ -202,16 +202,16 @@ public class OpenAIApi {
     }
 
     public ChatCompletionResponse chat(LLMModel model, String system, String user, Integer maxTokens, double temperature, boolean jsonMode, String openaiKey) {
-        return chat(model, List.of(SYSTEM.message(system), USER.message(user)), maxTokens, temperature, jsonMode, openaiKey);
+        return chat(model, List.of(SYSTEM.message(system), USER.message(user)), maxTokens, temperature, jsonMode, null, openaiKey);
     }
 
     public ChatCompletionResponse chat(LLMModel model, String system, String user, String assistant, Integer maxTokens, double temperature, boolean jsonMode, String openaiKey) {
-        return chat(model, List.of(SYSTEM.message(system), USER.message(user), ASSISTANT.message(assistant)), maxTokens, temperature, jsonMode, openaiKey);
+        return chat(model, List.of(SYSTEM.message(system), USER.message(user), ASSISTANT.message(assistant)), maxTokens, temperature, jsonMode, null, openaiKey);
     }
 
-    public ChatCompletionResponse chat(LLMModel model, List<ChatMessage> chats, int maxTokens, double temperature, boolean jsonMode, String openaiKey) {
+    public ChatCompletionResponse chat(LLMModel model, List<ChatMessage> chats, int maxTokens, double temperature, boolean jsonMode, Map<Integer, Integer> logitBias, String openaiKey) {
         List<ChatMessage> filteredChats = chats.stream().filter(c -> !StringUtils.isBlank(c.content())).toList();
-        Future<ChatCompletionResponse> future = executorService.submit(() -> chatInternal(model, filteredChats, maxTokens, temperature, jsonMode, openaiKey));
+        Future<ChatCompletionResponse> future = executorService.submit(() -> chatInternal(model, filteredChats, maxTokens, temperature, jsonMode, logitBias, openaiKey));
 
         try {
             return future.get();
@@ -220,7 +220,8 @@ public class OpenAIApi {
         }
     }
 
-    private ChatCompletionResponse chatInternal(LLMModel model, List<ChatMessage> chats, int maxTokens, double temperature, boolean jsonMode, String openaiKey) {
+    private ChatCompletionResponse chatInternal(LLMModel model, List<ChatMessage> chats, int maxTokens, double temperature, boolean jsonMode,
+                                                Map<Integer, Integer> logitBias, String openaiKey) {
         log.info("\nCalling OpenAI API:\n" +
                 "Model: " + model + " Max tokens:" + maxTokens + " Temperature:" + temperature + "\n" +
                 chats.stream().map(chatMessage -> chatMessage.role() + ":\n" +
@@ -231,7 +232,7 @@ public class OpenAIApi {
         while (true) {
             try {
                 ChatCompletionRequest request = new ChatCompletionRequest(
-                        model.getApiName(), chats, temperature, maxTokens, jsonMode ? new ResponseFormat("json_object") : null, false);
+                        model.getApiName(), chats, temperature, maxTokens, jsonMode ? new ResponseFormat("json_object") : null, false, logitBias);
 
                 if (Double.compare(temperature, 0) == 0) {
                     String cached = promptCache.get(createKey(model, chats, maxTokens));
